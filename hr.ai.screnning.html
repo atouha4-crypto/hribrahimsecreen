@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR AI Screener - فاحص السير الذاتية</title>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWVLY8uv8cuVFG_c-b3d7o_uc0YUpgatA",
+    authDomain: "hr-ai-screnner.firebaseapp.com",
+    databaseURL: "https://hr-ai-screnner-default-rtdb.firebaseio.com",
+    projectId: "hr-ai-screnner",
+    storageBucket: "hr-ai-screnner.firebasestorage.app",
+    messagingSenderId: "894784237456",
+    appId: "1:894784237456:web:eb6177db5ce085c3ac8d15",
+    measurementId: "G-XQD2M8QD57"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#333;line-height:1.6}
+.header{background:#1a237e;color:#fff;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.header h1{font-size:26px;margin-bottom:5px}.header p{color:#b3c5ff;font-size:14px}
+.container{max-width:900px;margin:0 auto;padding:15px}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card-title{font-size:18px;font-weight:bold;color:#1a237e;margin-bottom:15px;display:flex;align-items:center;gap:8px}
+.input-group{margin-bottom:15px}.input-group label{display:block;font-weight:600;margin-bottom:6px;color:#555;font-size:14px}
+.input-group input,.input-group select{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px}
+.input-group input:focus,.input-group select:focus{outline:none;border-color:#1a237e}
+.dynamic-list{margin-bottom:15px}.dynamic-list-title{font-weight:600;color:#444;margin-bottom:8px;font-size:15px}
+.list-item{display:flex;gap:8px;margin-bottom:8px;align-items:center}.list-item input{flex:1;padding:10px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+.btn-icon{background:#ff5252;color:#fff;border:none;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.btn-add{background:#4caf50;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:5px}
+.upload-zone{border:3px dashed #c5cae9;border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
+.upload-zone:hover,.upload-zone.dragover{border-color:#1a237e;background:#e8eaf6}
+.upload-zone .icon{font-size:48px;margin-bottom:10px}.upload-zone p{color:#666;font-size:15px}.upload-zone small{color:#999;font-size:12px}
+.file-list{margin-top:15px}.file-item{display:flex;align-items:center;justify-content:space-between;background:#e8eaf6;padding:10px 15px;border-radius:8px;margin-bottom:8px}
+.file-item .file-info{display:flex;align-items:center;gap:10px}.file-item .file-icon{font-size:24px}
+.file-item .file-name{font-size:14px;color:#333}.file-item .file-size{font-size:12px;color:#888}
+.file-item .btn-remove{background:transparent;border:none;color:#ff5252;cursor:pointer;font-size:20px}
+.btn-primary{width:100%;padding:16px;background:#1a237e;color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:bold;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-primary:hover{background:#283593}.btn-primary:disabled{background:#b0bec5;cursor:not-allowed}
+.loading{text-align:center;padding:40px;display:none}.loading.active{display:block}
+.spinner{width:50px;height:50px;border:4px solid #e0e0e0;border-top-color:#1a237e;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 15px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.results-section{display:none}.results-section.active{display:block}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.summary-card{text-align:center;padding:20px;border-radius:12px}
+.summary-card.strong{background:#e8f5e9;color:#2e7d32}.summary-card.potential{background:#fff3e0;color:#ef6c00}.summary-card.unlikely{background:#ffebee;color:#c62828}
+.summary-card .number{font-size:32px;font-weight:bold}.summary-card .label{font-size:13px;font-weight:600}
+.results-table{width:100%;border-collapse:collapse}.results-table th{background:#f5f5f5;padding:12px;text-align:right;font-size:13px;color:#666}
+.results-table td{padding:15px 12px;border-bottom:1px solid #eee;vertical-align:middle}.results-table tr:hover{background:#fafafa}
+.rank{font-size:18px;font-weight:bold;color:#1a237e}.candidate-name{font-weight:600;font-size:15px}.candidate-id{font-size:12px;color:#888}
+.score{font-size:24px;font-weight:bold}.score.strong{color:#2e7d32}.score.potential{color:#ef6c00}.score.unlikely{color:#c62828}
+.tier-badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.tier-badge.strong{background:#e8f5e9;color:#2e7d32}.tier-badge.potential{background:#fff3e0;color:#ef6c00}.tier-badge.unlikely{background:#ffebee;color:#c62828}
+.must-haves{display:flex;gap:4px;flex-wrap:wrap}.must-have-dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.must-have-dot.matched{background:#4caf50}.must-have-dot.unmatched{background:#e0e0e0}
+.btn-details{background:#1a237e;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}.modal{background:#fff;border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
+.modal-header h2{font-size:18px}.btn-close{background:none;border:none;font-size:24px;cursor:pointer;color:#888}
+.modal-body{padding:20px}.detail-score{display:flex;align-items:baseline;gap:10px;margin-bottom:15px}
+.detail-score .big{font-size:48px;font-weight:bold}.detail-score .label{font-size:20px;color:#888}
+.detail-section{margin-bottom:20px}.detail-section h3{font-size:14px;text-transform:uppercase;color:#666;margin-bottom:10px;font-weight:700}
+.criterion-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:8px;margin-bottom:8px}
+.criterion-item.matched{background:#e8f5e9}.criterion-item.unmatched{background:#ffebee}
+.criterion-item .icon{font-size:20px;margin-top:2px}.criterion-item .text{flex:1}.criterion-item .name{font-weight:600}
+.criterion-item .evidence{font-size:13px;color:#666;margin-top:3px}
+.progress-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}.progress-fill{height:100%;background:#1a237e;border-radius:4px;transition:width .3s}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#e8eaf6;color:#1a237e;padding:6px 14px;border-radius:20px;font-size:13px}
+.alert{padding:12px;border-radius:8px;margin-bottom:8px;font-size:14px}.alert.warning{background:#fff3e0;color:#e65100}
+.recommendation{background:#e8eaf6;padding:15px;border-radius:10px;font-size:15px;line-height:1.7}
+.bias-warning{background:#fff3e0;border:1px solid #ffcc80;border-radius:10px;padding:15px;margin-top:15px}
+.bias-warning h4{color:#e65100;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.bias-item{font-size:13px;color:#bf360c;margin-bottom:5px;padding-right:20px}
+@media(max-width:600px){.summary-grid{grid-template-columns:1fr}.results-table{font-size:13px}.results-table th,.results-table td{padding:10px 8px}.rank{font-size:14px}.score{font-size:18px}.modal{max-height:95vh}}
+.hidden{display:none!important}.error{background:#ffebee;border-right:4px solid #f44336;padding:15px;border-radius:8px;color:#c62828;margin-bottom:15px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}
+.settings-row label{font-weight:600}.toggle{width:50px;height:26px;background:#ccc;border-radius:13px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.active{background:#4caf50}.toggle::after{content:'';position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:2px;right:2px;transition:transform .2s}
+.toggle.active::after{transform:translateX(-24px)}
+.paste-area{width:100%;min-height:200px;padding:15px;border:2px dashed #c5cae9;border-radius:12px;font-size:14px;resize:vertical;font-family:inherit}
+.paste-area:focus{outline:none;border-color:#1a237e;border-style:solid}
+.mode-selector{display:flex;gap:10px;margin-bottom:15px}.mode-btn{flex:1;padding:12px;border:2px solid #e0e0e0;background:#fff;border-radius:10px;cursor:pointer;text-align:center;transition:all .2s}
+.mode-btn.active{border-color:#1a237e;background:#e8eaf6}.mode-btn .mode-icon{font-size:28px;margin-bottom:5px}
+.mode-btn .mode-label{font-weight:600;font-size:14px}.mode-btn .mode-desc{font-size:12px;color:#888}
+.firebase-status{position:fixed;top:10px;left:10px;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;z-index:9999;display:flex;align-items:center;gap:6px;transition:all .3s}
+.firebase-status.online{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.firebase-status.offline{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.firebase-status .dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.saved-jobs-list{max-height:300px;overflow-y:auto}.saved-job-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #eee;cursor:pointer;transition:background .2s}
+.saved-job-item:hover{background:#f5f5f5}.saved-job-item .job-info{flex:1}.saved-job-item .job-title{font-weight:600;font-size:14px;color:#1a237e}
+.saved-job-item .job-date{font-size:12px;color:#888}.saved-job-item .job-actions{display:flex;gap:5px}
+.btn-small{padding:5px 10px;border:none;border-radius:6px;cursor:pointer;font-size:12px}
+.btn-small.load{background:#1a237e;color:#fff}.btn-small.delete{background:#ff5252;color:#fff}.btn-small.export{background:#4caf50;color:#fff}
+</style>
+</head>
+<body>
+
+<div class="firebase-status offline" id="firebaseStatus"><span class="dot"></span><span id="firebaseStatusText">غير متصل</span></div>
+
+<header class="header"><h1>🎯 HR AI Screener</h1><p>فاحص السير الذاتية بالذكاء الاصطناعي - متصل بالسحابة ☁️</p></header>
+
+<div class="container">
+
+<div class="card" id="firebaseConfigCard">
+  <div class="card-title">🔥 إعدادات Firebase</div>
+  <div class="input-group"><label>API Key</label><input type="password" id="firebaseApiKey" placeholder="AIzaSy..."></div>
+  <div class="input-group"><label>Project ID</label><input type="text" id="firebaseProjectId" placeholder="my-project-123"></div>
+  <div class="input-group"><label>App ID (اختياري)</label><input type="text" id="firebaseAppId" placeholder="1:123456789:web:..."></div>
+  <div class="input-group"><label>Messaging Sender ID (اختياري)</label><input type="text" id="firebaseMessagingSenderId" placeholder="123456789"></div>
+  <button class="btn-primary" onclick="connectFirebase()" style="margin-top:10px;">🔗 الاتصال بـ Firebase</button>
+  <p style="margin-top:10px;font-size:13px;color:#888;text-align:center;">احصل على هذه المعلومات من <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></p>
+</div>
+
+<div class="card">
+  <div class="card-title">⚙️ الإعدادات</div>
+  <div class="settings-row"><label>وضع الذكاء الاصطناعي (OpenAI API)</label><div class="toggle" id="aiToggle" onclick="toggleAI()"></div></div>
+  <div id="apiKeySection" class="hidden"><div class="input-group"><label>مفتاح OpenAI API</label><input type="password" id="apiKey" placeholder="sk-..." onchange="saveApiKey()"></div></div>
+  <div class="settings-row"><label>اللغة</label><select id="langSelect" onchange="changeLang()" style="padding:8px 12px;border-radius:8px;border:2px solid #e0e0e0;"><option value="ar">العربية</option><option value="en">English</option></select></div>
+</div>
+
+<div class="card" id="savedJobsCard" style="display:none;">
+  <div class="card-title">💾 الوظائف المحفوظة في السحابة</div>
+  <div class="saved-jobs-list" id="savedJobsList"><p style="text-align:center;color:#888;padding:20px;">لا توجد وظائف محفوظة</p></div>
+</div>
+
+<div class="card">
+  <div class="card-title">📋 طريقة الإدخال</div>
+  <div class="mode-selector">
+    <div class="mode-btn active" onclick="setMode('file')" id="modeFile"><div class="mode-icon">📄</div><div class="mode-label">ملفات PDF</div><div class="mode-desc">ارفع ملفات PDF/DOCX</div></div>
+    <div class="mode-btn" onclick="setMode('paste')" id="modePaste"><div class="mode-icon">📝</div><div class="mode-label">لصق النص</div><div class="mode-desc">انسخ والصق النص مباشرة</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">📋 معايير الوظيفة</div>
+  <div class="input-group"><label>مسمى الوظيفة *</label><input type="text" id="roleTitle" placeholder="مثال: مطور Python senior"></div>
+  <div class="dynamic-list"><div class="dynamic-list-title">المتطلبات الأساسية (ضرورية) *</div><div id="mustHaveList"><div class="list-item"><input type="text" placeholder="مثال: Python, 5 سنوات خبرة" class="must-have-input"><button class="btn-icon" onclick="removeItem(this)">×</button></div></div><button class="btn-add" onclick="addMustHave()">+ إضافة</button></div>
+  <div class="dynamic-list"><div class="dynamic-list-title">المتطلبات المفضلة (إضافية)</div><div id="niceToHaveList"><div class="list-item"><input type="text" placeholder="مثال: AWS, Docker" class="nice-to-have-input"><button class="btn-icon" onclick="removeItem(this)">×</button></div></div><button class="btn-add" onclick="addNiceToHave()">+ إضافة</button></div>
+  <div class="dynamic-list"><div class="dynamic-list-title">موانع التعيين (Deal Breakers)</div><div id="dealBreakerList"><div class="list-item"><input type="text" placeholder="مثال: لا خبرة في Python" class="deal-breaker-input"><button class="btn-icon" onclick="removeItem(this)">×</button></div></div><button class="btn-add" onclick="addDealBreaker()">+ إضافة</button></div>
+  <div id="biasWarning" class="bias-warning hidden"><h4>⚠️ تنبيه: كلمات قد تكون تمييزية</h4><div id="biasList"></div></div>
+</div>
+
+<div id="fileMode"><div class="card"><div class="card-title">📤 رفع السير الذاتية</div><div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"><div class="icon">📄</div><p>اضغط هنا أو اسحب الملفات</p><small>PDF, DOCX فقط</small><input type="file" id="fileInput" multiple accept=".pdf,.docx" style="display:none" onchange="handleFiles(this.files)"></div><div class="file-list" id="fileList"></div></div></div>
+
+<div id="pasteMode" class="hidden"><div class="card"><div class="card-title">📝 لصق نص السيرة الذاتية</div><textarea class="paste-area" id="pasteArea" placeholder="انسخ نص السيرة الذاتية هنا..."></textarea><div style="margin-top:10px;text-align:center;color:#888;font-size:13px;">أضف سيرة واحدة في كل مرة</div><button class="btn-add" onclick="addPastedCandidate()" style="margin-top:10px;width:100%;justify-content:center;">+ إضافة مرشح</button><div class="file-list" id="pastedList"></div></div></div>
+
+<div id="errorMsg" class="error hidden"></div>
+
+<button class="btn-primary" id="screenBtn" onclick="screenCandidates()">🚀 بدء الفحص</button>
+<button class="btn-primary" id="saveBtn" onclick="saveToCloud()" style="margin-top:10px;background:#4caf50;display:none;">☁️ حفظ النتائج في السحابة</button>
+
+<div class="loading" id="loading"><div class="spinner"></div><p>جاري تحليل السير الذاتية...</p><p style="color:#888;font-size:13px;">قد يستغرق بضع ثوانٍ</p></div>
+
+<div class="results-section" id="resultsSection">
+  <div class="summary-grid"><div class="summary-card strong"><div class="number" id="strongCount">0</div><div class="label">تطابق قوي</div></div><div class="summary-card potential"><div class="number" id="potentialCount">0</div><div class="label">تطابق محتمل</div></div><div class="summary-card unlikely"><div class="number" id="unlikelyCount">0</div><div class="label">تطابق ضعيف</div></div></div>
+  <div class="card"><div class="card-title">📊 النتائج</div><table class="results-table"><thead><tr><th>#</th><th>المرشح</th><th>الدرجة</th><th>التصنيف</th><th>المتطلبات</th><th></th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+</div>
+
+</div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h2 id="modalTitle">تفاصيل المرشح</h2><button class="btn-close" onclick="closeModal()">×</button></div><div class="modal-body" id="modalBody"></div></div></div>
+
+<script>
+let candidates=[],aiEnabled=false,apiKey=localStorage.getItem('hr_api_key')||'',currentMode='file',currentJobId=null,fb=false;
+const SKILLS=["python","javascript","react","node.js","sql","aws","docker","kubernetes","machine learning","data analysis","project management","agile","scrum","leadership","communication","problem solving","teamwork","english","arabic","french","excel","powerpoint","tableau","tensorflow","pytorch","git","ci/cd","rest api","java","c++","c#","php","ruby","go","swift","flutter","django","flask","spring","laravel","mongodb","postgresql","mysql","redis","linux","bash","powershell","terraform","ansible","react native","vue.js","angular","svelte","next.js","tailwind","bootstrap","sass","less","figma","sketch","adobe xd","photoshop","illustrator","blender","unity","unreal engine","maya","3ds max","blockchain","solidity","web3","devops","sre","cloud","gcp","azure","data science","deep learning","nlp","computer vision","statistics","mathematics","algorithms","microservices","grpc","graphql","websocket","oauth","jwt","sso","penetration testing","security","compliance","gdpr","hipaa","soc2","product management","ux","ui","user research","a/b testing","analytics","salesforce","hubspot","crm","erp","sap","accounting","finance","recruiting","hr","marketing","sales","content writing","copywriting","seo","sem","social media","video editing","photography","translation","teaching","training","coaching","consulting","strategy","operations","supply chain","logistics","manufacturing","quality assurance","testing","automation","robotics","iot","embedded systems","fpga","verilog"];
+const BIAS={ar:["شاب","شابة","ذكر","أنثى","مصري","سعودي","هندي","فلبيني","أعزب","متزوج","جميل","وسيم","أشقر","أسمر"],en:["young","male","female","handsome","beautiful","single","married","indian","filipino","egyptian"]};
+
+async function connectFirebase(){
+  const k=document.getElementById('firebaseApiKey').value.trim(),p=document.getElementById('firebaseProjectId').value.trim();
+  if(!k||!p){showError('يرجى إدخال API Key و Project ID');return}
+  try{
+    const {initializeApp}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js");
+    const {getFirestore,collection,addDoc,getDocs,query,orderBy,deleteDoc,doc,updateDoc,getDoc,serverTimestamp}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+    const {getAuth,signInAnonymously}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js");
+    const {getStorage,ref,uploadBytes,getDownloadURL}=await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js");
+    const cfg={apiKey:k,authDomain:`${p}.firebaseapp.com`,projectId:p,storageBucket:`${p}.appspot.com`,messagingSenderId:document.getElementById('firebaseMessagingSenderId').value.trim()||"123456789",appId:document.getElementById('firebaseAppId').value.trim()||"1:123456789:web:abc123"};
+    const app=initializeApp(cfg,'hr-screener'),db=getFirestore(app),auth=getAuth(app),storage=getStorage(app);
+    window.db=db;window.auth=auth;window.storage=storage;window.col=collection;window.add=addDoc;window.getAll=getDocs;window.q=query;window.ord=orderBy;window.del=deleteDoc;window.d=doc;window.upd=updateDoc;window.getOne=getDoc;window.ts=serverTimestamp;window.r=ref;window.up=uploadBytes;window.url=getDownloadURL;
+    await signInAnonymously(auth);fb=true;
+    document.getElementById('firebaseStatus').classList.remove('offline');document.getElementById('firebaseStatus').classList.add('online');document.getElementById('firebaseStatusText').textContent='متصل بالسحابة';
+    document.getElementById('firebaseConfigCard').style.display='none';document.getElementById('savedJobsCard').style.display='block';document.getElementById('saveBtn').style.display='flex';
+    localStorage.setItem('firebase_config',JSON.stringify(cfg));showError('✅ تم الاتصال بـ Firebase بنجاح!','success');loadJobs();
+  }catch(err){showError('❌ فشل الاتصال: '+err.message)}
+}
+
+async function saveToCloud(){if(!fb){showError('يرجى الاتصال بـ Firebase أولاً');return}const t=document.getElementById('roleTitle').value.trim();if(!t){showError('يرجى إدخال مسمى الوظيفة');return}try{const ref=await window.add(window.col(window.db,'jobs'),{roleTitle:t,mustHaves:getList('mustHaveList'),niceToHaves:getList('niceToHaveList'),dealBreakers:getList('dealBreakerList'),candidates:candidates.map(c=>({id:c.id,name:c.name,size:c.size,text:c.text?c.text.substring(0,500):null})),results:window.lastResults||[],createdAt:window.ts(),updatedAt:window.ts()});currentJobId=ref.id;showError('✅ تم الحفظ بنجاح!','success');loadJobs()}catch(err){showError('❌ فشل الحفظ: '+err.message)}}
+
+async function loadJobs(){if(!fb)return;try{const snap=await window.getAll(window.q(window.col(window.db,'jobs'),window.ord('createdAt','desc')));const list=document.getElementById('savedJobsList');if(snap.empty){list.innerHTML='<p style="text-align:center;color:#888;padding:20px;">لا توجد وظائف محفوظة</p>';return}list.innerHTML='';snap.forEach(doc=>{const data=doc.data(),date=data.createdAt?.toDate?data.createdAt.toDate().toLocaleDateString('ar-SA'):'غير معروف';const item=document.createElement('div');item.className='saved-job-item';item.innerHTML=`<div class="job-info"><div class="job-title">${data.roleTitle||'وظيفة بدون اسم'}</div><div class="job-date">${date} · ${(data.candidates||[]).length} مرشح</div></div><div class="job-actions"><button class="btn-small load" onclick="loadJob('${doc.id}')">تحميل</button><button class="btn-small export" onclick="exportJob('${doc.id}')">تصدير</button><button class="btn-small delete" onclick="deleteJob('${doc.id}')">حذف</button></div>`;list.appendChild(item)})}catch(err){console.error(err)}}
+
+async function loadJob(id){if(!fb)return;try{const snap=await window.getOne(window.d(window.db,'jobs',id));if(!snap.exists()){showError('الوظيفة غير موجودة');return}const data=snap.data();currentJobId=id;document.getElementById('roleTitle').value=data.roleTitle||'';setList('mustHaveList','must-have-input',data.mustHaves||[]);setList('niceToHaveList','nice-to-have-input',data.niceToHaves||[]);setList('dealBreakerList','deal-breaker-input',data.dealBreakers||[]);candidates=(data.candidates||[]).map(c=>({...c,file:null}));updateFileList();if(data.results&&data.results.length>0){window.lastResults=data.results;displayResults(data.results)}showError('✅ تم التحميل بنجاح!','success');window.scrollTo({top:0,behavior:'smooth'})}catch(err){showError('❌ فشل التحميل: '+err.message)}}
+
+async function deleteJob(id){if(!confirm('هل أنت متأكد؟'))return;try{await window.del(window.d(window.db,'jobs',id));showError('✅ تم الحذف!','success');loadJobs();if(currentJobId===id)currentJobId=null}catch(err){showError('❌ فشل الحذف: '+err.message)}}
+
+async function exportJob(id){if(!fb)return;try{const snap=await window.getOne(window.d(window.db,'jobs',id));if(!snap.exists())return;const data=snap.data();const blob=new Blob([JSON.stringify({jobTitle:data.roleTitle,date:new Date().toISOString(),criteria:{mustHaves:data.mustHaves,niceToHaves:data.niceToHaves,dealBreakers:data.dealBreakers},candidates:data.candidates||[],results:data.results||[]},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`job-${data.roleTitle}-${new Date().toISOString().split('T')[0]}.json`;a.click();URL.revokeObjectURL(u);showError('✅ تم التصدير!','success')}catch(err){showError('❌ فشل التصدير: '+err.message)}}
+
+function getList(id){return Array.from(document.getElementById(id).querySelectorAll('input')).map(i=>i.value.trim()).filter(v=>v)}
+function setList(listId,cls,vals){const list=document.getElementById(listId);list.innerHTML='';if(vals.length===0)vals=[''];vals.forEach(v=>{const div=document.createElement('div');div.className='list-item';div.innerHTML=`<input type="text" placeholder="..." class="${cls}" value="${v}"><button class="btn-icon" onclick="removeItem(this)">×</button>`;list.appendChild(div)})}
+
+function toggleAI(){aiEnabled=!aiEnabled;document.getElementById('aiToggle').classList.toggle('active',aiEnabled);document.getElementById('apiKeySection').classList.toggle('hidden',!aiEnabled);if(aiEnabled&&apiKey)document.getElementById('apiKey').value=apiKey}
+function saveApiKey(){apiKey=document.getElementById('apiKey').value.trim();localStorage.setItem('hr_api_key',apiKey)}
+function changeLang(){}
+function setMode(mode){currentMode=mode;document.getElementById('modeFile').classList.toggle('active',mode==='file');document.getElementById('modePaste').classList.toggle('active',mode==='paste');document.getElementById('fileMode').classList.toggle('hidden',mode!=='file');document.getElementById('pasteMode').classList.toggle('hidden',mode!=='paste')}
+function addMustHave(){addItem('mustHaveList','must-have-input','مثال: Python, 5 سنوات خبرة')}
+function addNiceToHave(){addItem('niceToHaveList','nice-to-have-input','مثال: AWS, Docker')}
+function addDealBreaker(){addItem('dealBreakerList','deal-breaker-input','مثال: لا خبرة في Python')}
+function addItem(listId,cls,ph){const list=document.getElementById(listId);const div=document.createElement('div');div.className='list-item';div.innerHTML=`<input type="text" placeholder="${ph}" class="${cls}"><button class="btn-icon" onclick="removeItem(this)">×</button>`;list.appendChild(div)}
+function removeItem(btn){btn.parentElement.remove()}
+
+function handleFiles(files){for(const file of files){if(!file.name.match(/\.(pdf|docx)$/i)){showError(`الملف ${file.name} ليس PDF أو DOCX`);continue}candidates.push({id:Date.now()+Math.random(),name:file.name.replace(/\.(pdf|docx)$/i,''),file:file,text:null,size:file.size})}updateFileList()}
+function updateFileList(){const list=document.getElementById('fileList');if(candidates.length===0){list.innerHTML='';return}list.innerHTML=candidates.map((c,i)=>`<div class="file-item"><div class="file-info"><span class="file-icon">📄</span><div><div class="file-name">${c.name}</div><div class="file-size">${fmt(c.size||0)}</div></div></div><button class="btn-remove" onclick="removeCandidate(${i})">🗑️</button></div>`).join('')}
+function removeCandidate(i){candidates.splice(i,1);updateFileList()}
+function addPastedCandidate(){const text=document.getElementById('pasteArea').value.trim();if(!text){showError('يرجى لصق النص أولاً');return}const name=text.split('\n')[0].substring(0,30)||`مرشح ${candidates.length+1}`;candidates.push({id:Date.now()+Math.random(),name:name,file:null,text:text,size:text.length});document.getElementById('pasteArea').value='';updatePasted()}
+function updatePasted(){const list=document.getElementById('pastedList');const pasted=candidates.filter(c=>c.text);if(pasted.length===0){list.innerHTML='';return}list.innerHTML=pasted.map(c=>`<div class="file-item"><div class="file-info"><span class="file-icon">📝</span><div><div class="file-name">${c.name}</div><div class="file-size">${c.size} حرف</div></div></div><button class="btn-remove" onclick="removePasted('${c.id}')">🗑️</button></div>`).join('')}
+function removePasted(id){candidates=candidates.filter(c=>c.id!=id);updatePasted();updateFileList()}
+function fmt(b){if(b===0)return'0 B';const k=1024,s=['B','KB','MB'];const i=Math.floor(Math.log(b)/Math.log(k));return parseFloat((b/Math.pow(k,i)).toFixed(1))+' '+s[i]}
+function showError(msg,type='error'){const el=document.getElementById('errorMsg');el.textContent=msg;el.classList.remove('hidden');if(type==='success'){el.style.background='#e8f5e9';el.style.color='#2e7d32';el.style.borderRightColor='#4caf50'}else{el.style.background='#ffebee';el.style.color='#c62828';el.style.borderRightColor='#f44336'}setTimeout(()=>el.classList.add('hidden'),5000)}
+
+const uz=document.getElementById('uploadZone');
+['dragenter','dragover','dragleave','drop'].forEach(e=>uz.addEventListener(e,pe=>{pe.preventDefault();pe.stopPropagation()},false));
+['dragenter','dragover'].forEach(e=>uz.addEventListener(e,()=>uz.classList.add('dragover'),false));
+['dragleave','drop'].forEach(e=>uz.addEventListener(e,()=>uz.classList.remove('dragover'),false));
+uz.addEventListener('drop',e=>handleFiles(e.dataTransfer.files),false);
+
+async function screenCandidates(){
+  const role=document.getElementById('roleTitle').value.trim(),must=getList('mustHaveList');
+  if(!role){showError('يرجى إدخال مسمى الوظيفة');return}
+  if(must.length===0||must.every(h=>!h.trim())){showError('يرجى إدخال متطلب أساسي');return}
+  if(candidates.length===0){showError('يرجى إضافة سيرة ذاتية');return}
+  const allText=role+' '+must.join(' ')+' '+getList('niceToHaveList').join(' ');
+  const lang=document.getElementById('langSelect').value;
+  const bias=BIAS[lang].filter(w=>allText.toLowerCase().includes(w.toLowerCase()));
+  if(bias.length>0){document.getElementById('biasList').innerHTML=bias.map(w=>`<div class="bias-item">• ${w}</div>`).join('');document.getElementById('biasWarning').classList.remove('hidden')}else{document.getElementById('biasWarning').classList.add('hidden')}
+  document.getElementById('screenBtn').disabled=true;document.getElementById('loading').classList.add('active');document.getElementById('resultsSection').classList.remove('active');
+  try{let results;if(aiEnabled&&apiKey)results=await screenAI(role,must,getList('niceToHaveList'),getList('dealBreakerList'));else results=await screenLocal(role,must,getList('niceToHaveList'),getList('dealBreakerList'));window.lastResults=results;displayResults(results);if(fb&&currentJobId){await window.upd(window.d(window.db,'jobs',currentJobId),{results:results,updatedAt:window.ts()})}}catch(err){showError('حدث خطأ: '+err.message)}finally{document.getElementById('screenBtn').disabled=false;document.getElementById('loading').classList.remove('active')}
+}
+
+async function screenLocal(role,must,nice,deal){
+  const results=[];
+  for(const c of candidates){
+    let text=c.text;if(!text&&c.file)text=await extractText(c.file);if(!text)text=c.name+' - لا يمكن القراءة';
+    const tl=text.toLowerCase();
+    const mr=must.map(r=>({name:r,matched:match(tl,r),evidence:evidence(text,r)}));
+    const nr=nice.filter(n=>n).map(r=>({name:r,matched:match(tl,r),evidence:evidence(text,r)}));
+    const dr=deal.filter(d=>d).map(r=>({name:r,matched:match(tl,r),evidence:evidence(text,r)}));
+    const ms=mr.filter(r=>r.matched).length/Math.max(mr.length,1);
+    const ns=nr.filter(r=>r.matched).length/Math.max(nr.length,1);
+    const dh=dr.some(r=>r.matched);
+    let score=Math.round((ms*.7+ns*.3)*100);if(dh)score=Math.max(0,score-30);
+    let tier='unlikely';if(score>=75&&ms>=.8)tier='strong';else if(score>=50||ms>=.5)tier='potential';
+    const skills=SKILLS.filter(s=>tl.includes(s.toLowerCase()));
+    const years=text.match(/(\d+)\s*(?:year|years|سنة|سنوات|عام|أعوام)/i);
+    const edu=['bachelor','master','phd','doctorate','بكالوريوس','ماجستير','دكتوراه'].find(e=>tl.includes(e))||'غير محدد';
+    const alerts=[];if(dh)alerts.push({type:'warning',text:'يوجد مانع تعيين'});if(score<30)alerts.push({type:'warning',text:'تطابق ضعيف جداً'});
+    results.push({id:c.id,name:c.name,score,tier,mustHaves:mr,niceToHaves:nr,dealBreakers:dr,skills,yearsExp:years?years[1]+' سنوات':'غير محدد',education:edu,alerts,text:text.substring(0,500),recommendation:rec(score,tier,ms,dh)})
+  }
+  return results.sort((a,b)=>b.score-a.score);
+}
+
+function match(text,req){const terms=req.toLowerCase().split(/[,\s+]+/).filter(t=>t.length>2);if(terms.length===0)return false;return terms.some(t=>text.includes(t))}
+function evidence(text,req){const sentences=text.split(/[.\n]+/);const term=req.toLowerCase().split(/[,\s+]+/)[0];for(const s of sentences){if(s.toLowerCase().includes(term))return s.trim().substring(0,120)}return''}
+function rec(score,tier,ms,dh){if(dh)return'لا يُنصح بالتعيين - يوجد مانع تعيين واضح';if(tier==='strong')return'مرشح ممتاز - يستوفي معظم المتطلبات. يُنصح بالمقابلة الفورية';if(tier==='potential')return'مرشح واعد - يستحق المقابلة';return'مرشح ضعيف - لا يُنصح بالمتابعة'}
+
+async function screenAI(role,must,nice,deal){
+  const results=[];
+  for(const c of candidates){
+    let text=c.text;if(!text&&c.file)text=await extractText(c.file);if(!text)text=c.name+' - لا يمكن القراءة';
+    const prompt=`Analyze this CV against job requirements and return JSON only.\n\nJob Title: ${role}\nMust Haves: ${must.join(', ')}\nNice to Haves: ${nice.join(', ')}\nDeal Breakers: ${deal.join(', ')}\n\nCV Text:\n${text.substring(0,3000)}\n\nReturn ONLY JSON: {"score":0-100,"tier":"strong|potential|unlikely","mustHaves":[{"name":"skill","matched":true/false,"evidence":"quote"}],"niceToHaves":[...],"dealBreakers":[...],"skills":["skill1"],"yearsExp":"5 years","education":"Bachelor","alerts":[],"recommendation":"text"}`;
+    try{
+      const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:prompt}],temperature:0.3})});
+      const data=await res.json();const content=data.choices[0].message.content;const json=content.match(/\{[\s\S]*\}/);const ai=json?JSON.parse(json[0]):null;
+      if(ai){results.push({id:c.id,name:c.name,...ai,text:text.substring(0,500)})}else throw new Error('Invalid response')
+    }catch(err){console.error(err);const local=await screenLocal(role,must,nice,deal);const f=local.find(r=>r.id===c.id);if(f)results.push(f)}
+  }
+  return results.sort((a,b)=>b.score-a.score);
+}
+
+async function extractText(file){return new Promise(r=>{const reader=new FileReader();reader.onload=e=>r(e.target.result.substring(0,10000));reader.onerror=()=>r(null);reader.readAsText(file)})}
+
+function displayResults(results){
+  document.getElementById('strongCount').textContent=results.filter(r=>r.tier==='strong').length;
+  document.getElementById('potentialCount').textContent=results.filter(r=>r.tier==='potential').length;
+  document.getElementById('unlikelyCount').textContent=results.filter(r=>r.tier==='unlikely').length;
+  document.getElementById('resultsBody').innerHTML=results.map((r,i)=>`<tr><td><span class="rank">#${i+1}</span></td><td><div class="candidate-name">${r.name}</div><div class="candidate-id">ID: ${r.id.toString().slice(-6)}</div></td><td><span class="score ${r.tier}">${r.score}%</span></td><td><span class="tier-badge ${r.tier}">${r.tier==='strong'?'قوي':r.tier==='potential'?'محتمل':'ضعيف'}</span></td><td><div class="must-haves">${r.mustHaves.map(m=>`<span class="must-have-dot ${m.matched?'matched':'unmatched'}"></span>`).join('')}</div></td><td><button class="btn-details" onclick="showDetails('${r.id}')">التفاصيل</button></td></tr>`).join('');
+  document.getElementById('resultsSection').classList.add('active');
+}
+
+function showDetails(id){
+  const r=window.lastResults.find(x=>x.id==id);if(!r)return;
+  let html=`<div class="detail-score"><span class="big ${r.tier}">${r.score}%</span><span class="label">${r.tier==='strong'?'قوي':r.tier==='potential'?'محتمل':'ضعيف'}</span></div>`;
+  if(r.alerts&&r.alerts.length>0){html+=`<div class="detail-section">${r.alerts.map(a=>`<div class="alert ${a.type}">⚠️ ${a.text}</div>`).join('')}</div>`}
+  html+=`<div class="detail-section"><h3>المتطلبات الأساسية</h3>${r.mustHaves.map(m=>`<div class="criterion-item ${m.matched?'matched':'unmatched'}"><span class="icon">${m.matched?'✅':'❌'}</span><div class="text"><div class="name">${m.name}</div>${m.evidence?`<div class="evidence">"${m.evidence}"</div>`:''}</div></div>`).join('')}</div>`;
+  if(r.niceToHaves&&r.niceToHaves.length>0){html+=`<div class="detail-section"><h3>المتطلبات المفضلة</h3>${r.niceToHaves.map(m=>`<div class="criterion-item ${m.matched?'matched':'unmatched'}"><span class="icon">${m.matched?'✅':'❌'}</span><div class="text"><div class="name">${m.name}</div>${m.evidence?`<div class="evidence">"${m.evidence}"</div>`:''}</div></div>`).join('')}</div>`}
+  if(r.skills&&r.skills.length>0){html+=`<div class="detail-section"><h3>المهارات المكتشفة</h3><div class="chips">${r.skills.map(s=>`<span class="chip">${s}</span>`).join('')}</div></div>`}
+  html+=`<div class="detail-section"><h3>معلومات إضافية</h3><p><strong>سنوات الخبرة:</strong> ${r.yearsExp||'غير محدد'}</p><p><strong>التعليم:</strong> ${r.education||'غير محدد'}</p></div>`;
+  if(r.recommendation){html+=`<div class="detail-section"><h3>التوصية</h3><div class="recommendation">${r.recommendation}</div></div>`}
+  document.getElementById('modalTitle').textContent=`تفاصيل: ${r.name}`;document.getElementById('modalBody').innerHTML=html;document.getElementById('modal').classList.add('active');
+}
+
+function closeModal(e){if(!e||e.target.id==='modal')document.getElementById('modal').classList.remove('active')}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  if(apiKey)document.getElementById('apiKey').value=apiKey;
+  const saved=localStorage.getItem('firebase_config');
+  if(saved){try{const c=JSON.parse(saved);document.getElementById('firebaseApiKey').value=c.apiKey||'';document.getElementById('firebaseProjectId').value=c.projectId||'';document.getElementById('firebaseAppId').value=c.appId||'';document.getElementById('firebaseMessagingSenderId').value=c.messagingSenderId||''}catch(e){}}
+});
+</script>
+</body>
+</html>
